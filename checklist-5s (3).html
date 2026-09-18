@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Checklist Rotativo 5S</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root{
+  --navy:#152238;
+  --navy-light:#22374f;
+  --amber:#f2a71b;
+  --amber-dark:#c9860a;
+  --green:#2f9e44;
+  --green-bg:#e9f7ec;
+  --red:#d1453b;
+  --red-bg:#fceceb;
+  --gray:#8a8f98;
+  --gray-bg:#eef0f2;
+  --bg:#f5f3ee;
+  --card:#ffffff;
+  --border:#e3ded0;
+  --text:#1f2430;
+  --text-mute:#6b7280;
+  --radius:14px;
+}
+*{box-sizing:border-box;}
+body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;line-height:1.45;padding-bottom:110px;}
+h1,h2,h3{font-family:'Barlow Condensed',sans-serif;font-weight:700;margin:0;}
+
+/* ---------- header ---------- */
+.topbar{background:var(--navy);color:#fff;padding:22px 18px 20px;position:relative;overflow:hidden;}
+.topbar::after{content:"";position:absolute;right:-40px;top:-40px;width:150px;height:150px;background:var(--amber);opacity:.15;border-radius:50%;}
+.topbar h1{font-size:30px;letter-spacing:.2px;}
+.topbar p{margin:4px 0 0;color:#c7d0dd;font-size:14px;}
+.progress-wrap{margin-top:16px;}
+.progress-track{height:8px;background:rgba(255,255,255,.18);border-radius:6px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--amber);border-radius:6px;transition:width .35s ease;}
+.progress-label{font-size:12.5px;color:#c7d0dd;margin-top:6px;}
+
+/* ---------- generic card ---------- */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin:14px;padding:16px;}
+.card h2{font-size:20px;margin-bottom:2px;}
+.card .sub{color:var(--text-mute);font-size:13px;margin-bottom:14px;}
+
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:13.5px;font-weight:600;margin-bottom:6px;color:var(--navy);}
+.field input[type=text], .field input[type=date], .field select, textarea{
+  width:100%;padding:11px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:15.5px;font-family:inherit;background:#fff;color:var(--text);
+}
+.field select{
+  appearance:none;-webkit-appearance:none;-moz-appearance:none;
+  padding-right:40px;
+  background-image:url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5 8l5 5 5-5' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 14px center;
+  background-size:14px 14px;
+}
+.field input:focus, .field select:focus, textarea:focus{outline:none;border-color:var(--amber-dark);}
+.field-row{display:flex;gap:10px;flex-wrap:wrap;}
+.field-row .field{flex:1 1 140px;min-width:140px;}
+
+/* ---------- areas / accordion ---------- */
+#areasContainer{margin:14px;}
+details.area{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden;}
+details.area[open]{border-color:var(--amber-dark);}
+summary.area-head{list-style:none;cursor:pointer;padding:14px 16px;display:flex;align-items:center;gap:12px;}
+summary.area-head::-webkit-details-marker{display:none;}
+.area-idx{width:30px;height:30px;flex:none;border-radius:50%;background:var(--navy);color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;}
+.area-title{flex:1;min-width:0;}
+.area-title .name{font-size:17px;font-weight:700;color:var(--navy);}
+.area-title .status{font-size:12px;margin-top:2px;font-weight:600;}
+.status-pending{color:var(--gray);}
+.status-progress{color:var(--amber-dark);}
+.status-warning{color:var(--red);}
+.status-done{color:var(--green);}
+.chevron{flex:none;color:var(--gray);transition:transform .2s;font-size:14px;}
+details[open] .chevron{transform:rotate(180deg);}
+
+.area-body{padding:0 16px 18px;border-top:1px solid var(--border);}
+.q-block{padding:16px 0;border-bottom:1px solid #f0ede3;}
+.q-block:last-of-type{border-bottom:none;}
+.grupo-header{margin-top:14px;padding:4px 10px;background:var(--navy);color:#fff;display:inline-block;border-radius:8px;font-size:12.5px;font-weight:700;letter-spacing:.2px;}
+.grupo-header:first-child{margin-top:0;}
+.q-text{font-size:15px;font-weight:600;margin-bottom:10px;color:var(--text);}
+.radio-row{display:flex;gap:8px;}
+.radio-opt{flex:1;}
+.radio-opt input{position:absolute;opacity:0;pointer-events:none;}
+.radio-opt label{display:block;text-align:center;padding:10px 4px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-weight:600;color:var(--text-mute);cursor:pointer;transition:.15s;}
+.radio-opt input:checked + label{border-color:transparent;}
+.radio-opt.opt-sim input:checked + label{background:var(--green-bg);color:var(--green);border-color:var(--green);}
+.radio-opt.opt-nao input:checked + label{background:var(--red-bg);color:var(--red);border-color:var(--red);}
+.radio-opt.opt-na input:checked + label{background:var(--gray-bg);color:var(--gray);border-color:var(--gray);}
+
+.nc-panel{margin-top:14px;background:#fdf8ef;border:1.5px dashed var(--amber-dark);border-radius:12px;padding:12px;}
+.nc-panel .nc-label{font-size:13.5px;font-weight:700;color:var(--amber-dark);margin-bottom:8px;}
+.nc-sub{margin-top:14px;padding-top:14px;border-top:1px solid #eadfc4;}
+
+.photo-slot{margin-top:8px;}
+.photo-actions{display:flex;gap:8px;}
+.photo-btn{flex:1;text-align:center;padding:10px 6px;border:1.5px solid var(--navy);border-radius:10px;font-size:13px;font-weight:600;color:var(--navy);cursor:pointer;background:#fff;}
+.photo-btn input{display:none;}
+.photo-preview{margin-top:8px;position:relative;display:inline-block;}
+.photo-preview img{width:100%;max-width:220px;border-radius:10px;display:block;border:1px solid var(--border);}
+.photo-preview .rm{position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;background:var(--red);color:#fff;border:2px solid #fff;font-size:14px;line-height:1;cursor:pointer;}
+.req-mark{color:var(--red);font-weight:700;}
+.hint{font-size:12px;color:var(--text-mute);margin-top:6px;}
+
+textarea{min-height:70px;resize:vertical;}
+
+.general-photos{margin-top:6px;}
+.gp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px;}
+.gp-grid .photo-preview img{max-width:100%;height:80px;object-fit:cover;}
+
+/* ---------- footer bar ---------- */
+.footer-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);padding:12px 14px;box-shadow:0 -4px 14px rgba(0,0,0,.06);z-index:20;}
+.btn-primary{display:block;width:100%;padding:14px;background:var(--navy);color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;}
+.btn-primary:active{background:var(--navy-light);}
+.toast{position:fixed;left:14px;right:14px;bottom:90px;background:var(--red);color:#fff;padding:12px 14px;border-radius:10px;font-size:14px;font-weight:600;z-index:30;box-shadow:0 6px 16px rgba(0,0,0,.2);}
+
+/* ---------- report ---------- */
+#report{display:none;}
+.score-hero{display:flex;gap:14px;align-items:center;margin-bottom:6px;}
+.score-num{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:56px;line-height:1;}
+.score-num.good{color:var(--green);}
+.score-num.mid{color:var(--amber-dark);}
+.score-num.bad{color:var(--red);}
+.score-meta{font-size:13px;color:var(--text-mute);}
+.area-score-row{display:flex;align-items:center;gap:10px;margin:10px 0;}
+.area-score-row .lbl{flex:0 0 150px;font-size:13.5px;font-weight:600;}
+.bar-track{flex:1;height:9px;background:var(--gray-bg);border-radius:6px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:6px;}
+.area-score-row .pct{flex:0 0 40px;text-align:right;font-size:13px;font-weight:700;}
+
+.counters{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;}
+.counter-box{background:var(--gray-bg);border-radius:12px;padding:12px;text-align:center;}
+.counter-box .n{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:700;color:var(--navy);}
+.counter-box .l{font-size:12px;color:var(--text-mute);}
+
+.plano-item{border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px;}
+.plano-item .area-tag{display:inline-block;background:var(--navy);color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;margin-bottom:6px;}
+.plano-item .q{font-size:14px;font-weight:600;margin-bottom:4px;}
+.plano-item .obs{font-size:13.5px;color:var(--text-mute);margin-bottom:8px;}
+.plano-item img{width:100%;max-width:260px;border-radius:10px;border:1px solid var(--border);}
+
+.empty-note{color:var(--text-mute);font-size:14px;text-align:center;padding:14px 0;}
+.btn-secondary{display:block;width:100%;padding:12px;background:#fff;color:var(--navy);border:1.5px solid var(--navy);border-radius:12px;font-size:15px;font-weight:700;margin-top:10px;cursor:pointer;font-family:'Inter',sans-serif;}
+
+@media print{
+  .footer-bar, #areasContainer, #identCard, .topbar .progress-wrap{display:none !important;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>Checklist Rotativo 5S</h1>
+  <p>Auditoria rápida por área — só abra o que for auditar agora.</p>
+  <div class="progress-wrap">
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="progress-label" id="progressLabel">0 de 7 áreas concluídas</div>
+  </div>
+</div>
+
+<div id="formView">
+  <div class="card" id="identCard">
+    <h2>Identificação</h2>
+    <div class="sub">Preencha antes de iniciar a rodada</div>
+    <div class="field">
+      <label for="inpNome">Nome do auditor</label>
+      <input type="text" id="inpNome" placeholder="Seu nome completo">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label for="inpData">Data</label>
+        <input type="date" id="inpData">
+      </div>
+      <div class="field">
+        <label for="selTurno">Turno</label>
+        <select id="selTurno">
+          <option value="">Selecione</option>
+          <option value="Turno 1">Turno 11</option>
+          <option value="Turno 2">Turno 21</option>
+          <option value="Turno 3">Turno 31</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label for="selUnidade">Unidade</label>
+      <select id="selUnidade">
+        <option value="">Selecione</option>
+        <option value="Matriz">Matriz</option>
+        <option value="Nordeste">Nordeste</option>
+        <option value="Centro Oeste">Centro Oeste</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="areasContainer"></div>
+</div>
+
+<div id="report">
+  <div class="card">
+    <h2>Relatório da Auditoria</h2>
+    <div class="sub" id="repIdent"></div>
+    <div class="score-hero">
+      <div class="score-num" id="scoreGeralNum">--</div>
+      <div class="score-meta">Score geral<br><span id="scoreGeralTxt"></span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 style="font-size:17px;">Score por área</h2>
+    <div id="areaScores"></div>
+  </div>
+
+  <div class="card">
+    <h2 style="font-size:17px;">Ações</h2>
+    <div class="counters">
+      <div class="counter-box"><div class="n" id="cntAjustadas">0</div><div class="l">Não conformidades ajustadas na hora</div></div>
+      <div class="counter-box"><div class="n" id="cntPendentes">0</div><div class="l">Ações pendentes (plano de ação)</div></div>
+    </div>
+    <div id="pendentesPorArea" style="margin-top:12px;"></div>
+  </div>
+
+  <div class="card">
+    <h2 style="font-size:17px;">Plano de ação consolidado</h2>
+    <div class="sub">Itens marcados como "Não" e não corrigidos no momento</div>
+    <div id="planoList"></div>
+  </div>
+
+  <div class="card">
+    <button class="btn-secondary" id="btnPrint" type="button">Imprimir / salvar como PDF</button>
+    <button class="btn-secondary" id="btnEditar" type="button">Voltar e editar</button>
+    <button class="btn-secondary" id="btnNovo" type="button" style="color:var(--red);border-color:var(--red);">Iniciar nova auditoria</button>
+  </div>
+</div>
+
+<div class="footer-bar" id="footerBar">
+  <button class="btn-primary" id="btnFinalizar" type="button">Finalizar auditoria</button>
+</div>
+
+<script>
+/* ============================================================
+   DADOS DO CHECKLIST
+   ============================================================ */
+const AREAS = [
+  { id:'copa', nome:'Copa', perguntas:[
+    {id:'copa1', texto:'O posto de abastecimento dentro da copa está com as quantidades mínimas dos itens?'},
+    {id:'copa2', texto:'O quadro sombra está correto?'},
+  ]},
+  { id:'docas', nome:'Docas (Carregamento e Recebimento)', perguntas:[
+    {id:'docas1', texto:'Os padrões do posto de trabalho (Mesa do Recebimento) estão corretos?'},
+    {id:'docas2', texto:'Há alguma não conformidade no local (observação da área)?', notaLivre:true},
+    {id:'docas3', texto:'Os armários estão em ordem?'},
+    {id:'docas4', texto:'O quadro sombra está correto?'},
+  ]},
+  { id:'corredores', nome:'Corredores e Ruas de Picking', perguntas:[
+    {id:'corr1', texto:'Há alguma não conformidade no local (observação da rua)?', notaLivre:true},
+    {id:'corr2', texto:'O quadro sombra está correto?'},
+  ]},
+  { id:'checkout', nome:'Checkout (9 Postos)', perguntas:[
+    {id:'chk1', texto:'Há alguma não conformidade no local (observação da área)?', notaLivre:true},
+  ]},
+  { id:'zonas', nome:'Zonas de Separação', perguntas:[
+    {id:'zona01_1', grupo:'Zona 01', texto:'Há rafias abertas, stretch ou tocos/sarrafos pelos cantos?'},
+    {id:'zona01_2', grupo:'Zona 01', texto:'O quadro sombra está correto?'},
+    {id:'zona02_1', grupo:'Zona 02', texto:'Há rafias abertas, stretch ou tocos/sarrafos pelos cantos?'},
+    {id:'zona02_2', grupo:'Zona 02', texto:'O quadro sombra está correto?'},
+    {id:'zona04_1', grupo:'Zona 04', texto:'Há rafias abertas, stretch ou tocos/sarrafos pelos cantos?'},
+    {id:'zona04_2', grupo:'Zona 04', texto:'O quadro sombra está correto?'},
+    {id:'zona05_1', grupo:'Zona 05', texto:'Há rafias abertas, stretch ou tocos/sarrafos pelos cantos?'},
+    {id:'zona05_2', grupo:'Zona 05', texto:'O quadro sombra está correto?'},
+    {id:'zona06_1', grupo:'Zona 06', texto:'Há rafias abertas, stretch ou tocos/sarrafos pelos cantos?'},
+    {id:'zona06_2', grupo:'Zona 06', texto:'O quadro sombra está correto?'},
+  ]},
+  { id:'armarios', nome:'Armários Rotativos', perguntas:[
+    {id:'arm1', texto:'O espaço em cima e ao redor dos armários está livre de objetos esquecidos ou caixas?'},
+    {id:'arm2', texto:'As portas dos armários estão fechadas corretamente?'},
+    {id:'arm3', texto:'O aspecto dos armários está limpo (sem sujeira grossa ou adesivos irregulares)?'},
+  ]},
+  { id:'sala', nome:'Sala de Reunião e Supervisão', perguntas:[
+    {id:'sala1', texto:'A sala está livre de materiais da operação (como caixas, EPIs ou ferramentas)?'},
+    {id:'sala2', texto:'As cadeiras, mesa e o posto de guarda-chuva estão organizados no lugar certo?'},
+    {id:'sala3', texto:'A mesa está limpa (sem copos sujos) e o quadro branco foi apagado?'},
+  ]},
+];
+
+const PESO = 2;
+
+/* ============================================================
+   ESTADO
+   ============================================================ */
+function novoEstadoPergunta(){
+  return { resposta:null, evidenciaFoto:null, corrigida:null, confirmacaoFoto:null, obsPlano:'', notaLivre:'' };
+}
+function novoEstado(){
+  const areas = {};
+  AREAS.forEach(a=>{
+    const perguntas = {};
+    a.perguntas.forEach(p=>{ perguntas[p.id] = novoEstadoPergunta(); });
+    areas[a.id] = { perguntas, fotosGerais:[] };
+  });
+  return {
+    header:{ nome:'', data:'', turno:'', unidade:'' },
+    areas,
+    uiExpanded:{},
+    finalized:false
+  };
+}
+let state = novoEstado();
+
+/* ============================================================
+   UTIL: compressão de imagem
+   ============================================================ */
+function compressImage(file, maxDim=900, quality=0.6){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = (e)=>{
+      const img = new Image();
+      img.onload = ()=>{
+        let w = img.width, h = img.height;
+        if(w > h && w > maxDim){ h = Math.round(h * maxDim / w); w = maxDim; }
+        else if(h >= w && h > maxDim){ w = Math.round(w * maxDim / h); h = maxDim; }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function areaStatus(area){
+  const qs = area.perguntas.map(p => state.areas[area.id].perguntas[p.id]);
+  const answered = qs.filter(q => q.resposta).length;
+  if(answered === 0) return {label:'Não iniciada', cls:'status-pending'};
+
+  const incomplete = qs.some(q => {
+    if(!q.resposta) return true;
+    if(q.resposta === 'Não'){
+      if(!q.evidenciaFoto) return true;
+      if(!q.corrigida) return true;
+      if(q.corrigida === 'Sim' && !q.confirmacaoFoto) return true;
+      if(q.corrigida === 'Não' && !q.obsPlano.trim()) return true;
+    }
+    return false;
+  });
+  if(incomplete) return {label:'Em andamento', cls:'status-progress'};
+
+  const hasPendente = qs.some(q => q.resposta === 'Não' && q.corrigida === 'Não');
+  if(hasPendente) return {label:'Concluída, com pendência', cls:'status-warning'};
+
+  return {label:'Concluída', cls:'status-done'};
+}
+
+function photoSlotHTML(value, dataAttrs, label){
+  if(value){
+    return `
+      <div class="photo-slot">
+        <div class="photo-preview">
+          <img src="${value}">
+          <div class="rm" data-photo-remove ${dataAttrs}>&times;</div>
+        </div>
+      </div>`;
+  }
+  return `
+    <div class="photo-slot">
+      <div class="photo-actions">
+        <label class="photo-btn">Tirar foto
+          <input type="file" accept="image/*" capture="environment" data-photo-input ${dataAttrs}>
+        </label>
+        <label class="photo-btn">Galeria
+          <input type="file" accept="image/*" data-photo-input ${dataAttrs}>
+        </label>
+      </div>
+      ${label ? `<div class="hint">${label}</div>` : ''}
+    </div>`;
+}
+
+function radioRowHTML(area, pergunta, qState){
+  const opts = [['Sim','opt-sim'],['Não','opt-nao'],['N/A','opt-na']];
+  return `<div class="radio-row">` + opts.map(([val,cls])=>{
+    const inputId = `r_${area.id}_${pergunta.id}_${val}`;
+    const checked = qState.resposta === val ? 'checked' : '';
+    return `
+      <div class="radio-opt ${cls}">
+        <input type="radio" id="${inputId}" name="resp_${area.id}_${pergunta.id}" value="${val}"
+          data-resp data-area="${area.id}" data-pergunta="${pergunta.id}" ${checked}>
+        <label for="${inputId}">${val}</label>
+      </div>`;
+  }).join('') + `</div>`;
+}
+
+function ncPanelHTML(area, pergunta, qState){
+  if(qState.resposta !== 'Não') return '';
+  let html = `<div class="nc-panel">`;
+  html += `<div class="nc-label">Não conformidade identificada</div>`;
+  html += `<div class="field"><label>Foto da não conformidade <span class="req-mark">*</span></label>`;
+  html += photoSlotHTML(qState.evidenciaFoto, `data-area="${area.id}" data-pergunta="${pergunta.id}" data-kind="evidencia"`);
+  html += `</div>`;
+
+  html += `<div class="nc-sub">`;
+  html += `<div class="q-text" style="font-size:14px;">Foi corrigida no momento da auditoria? <span class="req-mark">*</span></div>`;
+  html += `<div class="radio-row">`;
+  [['Sim','opt-sim'],['Não','opt-nao']].forEach(([val,cls])=>{
+    const inputId = `c_${area.id}_${pergunta.id}_${val}`;
+    const checked = qState.corrigida === val ? 'checked' : '';
+    html += `
+      <div class="radio-opt ${cls}">
+        <input type="radio" id="${inputId}" name="corr_${area.id}_${pergunta.id}" value="${val}"
+          data-corr data-area="${area.id}" data-pergunta="${pergunta.id}" ${checked}>
+        <label for="${inputId}">${val}</label>
+      </div>`;
+  });
+  html += `</div>`;
+
+  if(qState.corrigida === 'Sim'){
+    html += `<div class="field" style="margin-top:12px;"><label>Foto de confirmação <span class="req-mark">*</span></label>`;
+    html += photoSlotHTML(qState.confirmacaoFoto, `data-area="${area.id}" data-pergunta="${pergunta.id}" data-kind="confirmacao"`, 'Envie uma foto que comprove a correção imediata.');
+    html += `</div>`;
+  } else if(qState.corrigida === 'Não'){
+    html += `<div class="field" style="margin-top:12px;"><label>Descreva o plano de ação necessário</label>`;
+    html += `<textarea data-obs data-area="${area.id}" data-pergunta="${pergunta.id}" placeholder="O que precisa ser feito, e por quem, para corrigir isso?">${qState.obsPlano}</textarea>`;
+    html += `<div class="hint">Esse item entrará no plano de ação do relatório final, junto com a foto acima.</div></div>`;
+  }
+  html += `</div></div>`;
+  return html;
+}
+
+function areaBodyHTML(area){
+  let html = '';
+  let lastGrupo = null;
+  area.perguntas.forEach(pergunta=>{
+    const qState = state.areas[area.id].perguntas[pergunta.id];
+    if(pergunta.grupo && pergunta.grupo !== lastGrupo){
+      html += `<div class="grupo-header">${pergunta.grupo}</div>`;
+      lastGrupo = pergunta.grupo;
+    }
+    html += `<div class="q-block">`;
+    html += `<div class="q-text">${pergunta.texto}</div>`;
+    html += radioRowHTML(area, pergunta, qState);
+    if(pergunta.notaLivre){
+      html += `<div class="field" style="margin-top:10px;"><label>Observação <span style="font-weight:400;color:var(--text-mute);">(opcional)</span></label>`;
+      html += `<textarea data-nota data-area="${area.id}" data-pergunta="${pergunta.id}" placeholder="Descreva o que foi observado, se necessário">${qState.notaLivre}</textarea></div>`;
+    }
+    html += ncPanelHTML(area, pergunta, qState);
+    html += `</div>`;
+  });
+
+  const fotos = state.areas[area.id].fotosGerais;
+  html += `<div class="q-block general-photos">`;
+  html += `<div class="q-text">Registro de imagem da área <span style="font-weight:400;color:var(--text-mute);">(opcional)</span></div>`;
+  html += `<div class="photo-actions">
+      <label class="photo-btn">Tirar foto
+        <input type="file" accept="image/*" capture="environment" data-geral-input data-area="${area.id}">
+      </label>
+      <label class="photo-btn">Galeria
+        <input type="file" accept="image/*" data-geral-input data-area="${area.id}">
+      </label>
+    </div>`;
+  if(fotos.length){
+    html += `<div class="gp-grid">`;
+    fotos.forEach((f, idx)=>{
+      html += `<div class="photo-preview"><img src="${f}"><div class="rm" data-geral-remove data-area="${area.id}" data-idx="${idx}">&times;</div></div>`;
+    });
+    html += `</div>`;
+  }
+  html += `</div>`;
+  return html;
+}
+
+function renderAreas(){
+  const container = document.getElementById('areasContainer');
+  container.innerHTML = AREAS.map((area, i)=>{
+    try{
+      const st = areaStatus(area);
+      const open = state.uiExpanded[area.id] ? 'open' : '';
+      return `
+        <details class="area" data-area-id="${area.id}" ${open}>
+          <summary class="area-head">
+            <div class="area-idx">${i+1}</div>
+            <div class="area-title">
+              <div class="name">${area.nome}</div>
+              <div class="status ${st.cls}">${st.label}</div>
+            </div>
+            <div class="chevron">▾</div>
+          </summary>
+          <div class="area-body">${areaBodyHTML(area)}</div>
+        </details>`;
+    }catch(err){
+      return `<div class="card" style="border-color:var(--red);">
+        <h2 style="color:var(--red);font-size:16px;">Erro ao carregar "${area.nome}"</h2>
+        <p class="hint">${(err && err.message) || err}</p>
+      </div>`;
+    }
+  }).join('');
+
+  container.querySelectorAll('details.area').forEach(el=>{
+    el.addEventListener('toggle', ()=>{ state.uiExpanded[el.dataset.areaId] = el.open; });
+  });
+
+  updateProgress();
+}
+
+function updateProgress(){
+  const done = AREAS.filter(a => areaStatus(a).cls === 'status-done' || areaStatus(a).cls === 'status-warning').length;
+  document.getElementById('progressFill').style.width = Math.round(done/AREAS.length*100) + '%';
+  document.getElementById('progressLabel').textContent = `${done} de ${AREAS.length} áreas concluídas`;
+}
+
+/* ============================================================
+   EVENTOS
+   ============================================================ */
+document.getElementById('inpNome').addEventListener('input', e=> state.header.nome = e.target.value);
+document.getElementById('inpData').addEventListener('input', e=> state.header.data = e.target.value);
+document.getElementById('selTurno').addEventListener('change', e=> state.header.turno = e.target.value);
+document.getElementById('selUnidade').addEventListener('change', e=> state.header.unidade = e.target.value);
+
+const areasContainer = document.getElementById('areasContainer');
+
+areasContainer.addEventListener('change', async (e)=>{
+  const t = e.target;
+
+  if(t.matches('[data-resp]')){
+    const q = state.areas[t.dataset.area].perguntas[t.dataset.pergunta];
+    q.resposta = t.value;
+    if(t.value !== 'Não'){
+      q.evidenciaFoto = null; q.corrigida = null; q.confirmacaoFoto = null; q.obsPlano = '';
+    }
+    renderAreas();
+    return;
+  }
+
+  if(t.matches('[data-corr]')){
+    const q = state.areas[t.dataset.area].perguntas[t.dataset.pergunta];
+    q.corrigida = t.value;
+    if(t.value === 'Não') q.confirmacaoFoto = null;
+    if(t.value === 'Sim') q.obsPlano = '';
+    renderAreas();
+    return;
+  }
+
+  if(t.matches('[data-obs]')){
+    const q = state.areas[t.dataset.area].perguntas[t.dataset.pergunta];
+    q.obsPlano = t.value;
+    return;
+  }
+
+  if(t.matches('[data-nota]')){
+    const q = state.areas[t.dataset.area].perguntas[t.dataset.pergunta];
+    q.notaLivre = t.value;
+    return;
+  }
+
+  if(t.matches('[data-photo-input]')){
+    const file = t.files[0];
+    if(!file) return;
+    const dataUrl = await compressImage(file);
+    const q = state.areas[t.dataset.area].perguntas[t.dataset.pergunta];
+    if(t.dataset.kind === 'evidencia') q.evidenciaFoto = dataUrl;
+    else if(t.dataset.kind === 'confirmacao') q.confirmacaoFoto = dataUrl;
+    renderAreas();
+    return;
+  }
+
+  if(t.matches('[data-geral-input]')){
+    const file = t.files[0];
+    if(!file) return;
+    const dataUrl = await compressImage(file);
+    state.areas[t.dataset.area].fotosGerais.push(dataUrl);
+    renderAreas();
+    return;
+  }
+});
+
+areasContainer.addEventListener('click', (e)=>{
+  const rm = e.target.closest('[data-photo-remove]');
+  if(rm){
+    const q = state.areas[rm.dataset.area].perguntas[rm.dataset.pergunta];
+    if(rm.dataset.kind === 'evidencia') q.evidenciaFoto = null;
+    else if(rm.dataset.kind === 'confirmacao') q.confirmacaoFoto = null;
+    renderAreas();
+    return;
+  }
+  const rmg = e.target.closest('[data-geral-remove]');
+  if(rmg){
+    state.areas[rmg.dataset.area].fotosGerais.splice(parseInt(rmg.dataset.idx,10), 1);
+    renderAreas();
+    return;
+  }
+});
+
+/* ============================================================
+   VALIDAÇÃO E FINALIZAÇÃO
+   ============================================================ */
+function showToast(msg){
+  const old = document.querySelector('.toast');
+  if(old) old.remove();
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(()=> el.remove(), 3200);
+}
+
+function validar(){
+  if(!state.header.nome.trim()){ showToast('Informe o nome do auditor.'); return false; }
+  if(!state.header.data){ showToast('Informe a data da auditoria.'); return false; }
+  if(!state.header.turno){ showToast('Selecione o turno.'); return false; }
+  if(!state.header.unidade){ showToast('Selecione a unidade.'); return false; }
+
+  for(const area of AREAS){
+    for(const pergunta of area.perguntas){
+      const q = state.areas[area.id].perguntas[pergunta.id];
+      if(!q.resposta){
+        state.uiExpanded[area.id] = true;
+        showToast(`Responda todas as perguntas de "${area.nome}".`);
+        renderAreas();
+        return false;
+      }
+      if(q.resposta === 'Não'){
+        if(!q.evidenciaFoto){
+          state.uiExpanded[area.id] = true;
+          showToast(`Envie a foto da não conformidade em "${area.nome}".`);
+          renderAreas();
+          return false;
+        }
+        if(!q.corrigida){
+          state.uiExpanded[area.id] = true;
+          showToast(`Informe se a não conformidade foi corrigida em "${area.nome}".`);
+          renderAreas();
+          return false;
+        }
+        if(q.corrigida === 'Sim' && !q.confirmacaoFoto){
+          state.uiExpanded[area.id] = true;
+          showToast(`Envie a foto de confirmação em "${area.nome}".`);
+          renderAreas();
+          return false;
+        }
+        if(q.corrigida === 'Não' && !q.obsPlano.trim()){
+          state.uiExpanded[area.id] = true;
+          showToast(`Descreva o plano de ação pendente em "${area.nome}".`);
+          renderAreas();
+          return false;
+        }
+      }
+    }
+  }
+  return true;
+}
+
+function computeScores(){
+  let totalObtained = 0, totalMax = 0;
+  const areaScores = {};
+  let ajustadas = 0;
+  const pendentesPorArea = {};
+  const planoDeAcao = [];
+
+  AREAS.forEach(area=>{
+    let obtained = 0, max = 0;
+    area.perguntas.forEach(pergunta=>{
+      const q = state.areas[area.id].perguntas[pergunta.id];
+      if(q.resposta === 'N/A') return;
+      max += PESO;
+      if(q.resposta === 'Sim'){
+        obtained += PESO;
+      } else if(q.resposta === 'Não'){
+        if(q.corrigida === 'Sim'){
+          obtained += PESO/2;
+          ajustadas++;
+        } else if(q.corrigida === 'Não'){
+          pendentesPorArea[area.id] = (pendentesPorArea[area.id]||0) + 1;
+          planoDeAcao.push({
+            areaNome: area.nome,
+            pergunta: (pergunta.grupo ? pergunta.grupo + ' — ' : '') + pergunta.texto,
+            obs: [q.notaLivre ? 'Observação: ' + q.notaLivre : '', q.obsPlano ? 'Plano de ação: ' + q.obsPlano : ''].filter(Boolean).join(' · '),
+            foto: q.evidenciaFoto
+          });
+        }
+      }
+    });
+    areaScores[area.id] = max > 0 ? Math.round(obtained/max*100) : null;
+    totalObtained += obtained;
+    totalMax += max;
+  });
+
+  const scoreGeral = totalMax > 0 ? Math.round(totalObtained/totalMax*100) : 0;
+  return { scoreGeral, areaScores, ajustadas, pendentesPorArea, planoDeAcao };
+}
+
+function scoreClass(pct){
+  if(pct >= 90) return 'good';
+  if(pct >= 70) return 'mid';
+  return 'bad';
+}
+function scoreColor(pct){
+  if(pct >= 90) return 'var(--green)';
+  if(pct >= 70) return 'var(--amber-dark)';
+  return 'var(--red)';
+}
+
+function renderReport(){
+  const { scoreGeral, areaScores, ajustadas, pendentesPorArea, planoDeAcao } = computeScores();
+
+  document.getElementById('repIdent').textContent =
+    `${state.header.nome} · ${formatDate(state.header.data)} · ${state.header.turno} · ${state.header.unidade}`;
+
+  const scoreEl = document.getElementById('scoreGeralNum');
+  scoreEl.textContent = scoreGeral + '%';
+  scoreEl.className = 'score-num ' + scoreClass(scoreGeral);
+  document.getElementById('scoreGeralTxt').textContent =
+    scoreGeral >= 90 ? 'Excelente' : scoreGeral >= 70 ? 'Atenção em alguns pontos' : 'Requer ação imediata';
+
+  const areaScoresEl = document.getElementById('areaScores');
+  areaScoresEl.innerHTML = AREAS.map(area=>{
+    const pct = areaScores[area.id];
+    if(pct === null) return `
+      <div class="area-score-row">
+        <div class="lbl">${area.nome}</div>
+        <div class="bar-track"></div>
+        <div class="pct" style="color:var(--gray);">N/A</div>
+      </div>`;
+    return `
+      <div class="area-score-row">
+        <div class="lbl">${area.nome}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${scoreColor(pct)};"></div></div>
+        <div class="pct" style="color:${scoreColor(pct)};">${pct}%</div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('cntAjustadas').textContent = ajustadas;
+  const totalPendentes = Object.values(pendentesPorArea).reduce((a,b)=>a+b,0);
+  document.getElementById('cntPendentes').textContent = totalPendentes;
+
+  const pendEl = document.getElementById('pendentesPorArea');
+  const areasComPendencia = AREAS.filter(a => pendentesPorArea[a.id]);
+  pendEl.innerHTML = areasComPendencia.length
+    ? '<div class="hint" style="margin-bottom:6px;">Pendências por área:</div>' +
+      areasComPendencia.map(a=>`<div class="hint">• ${a.nome}: ${pendentesPorArea[a.id]}</div>`).join('')
+    : '<div class="hint">Nenhuma pendência em aberto.</div>';
+
+  const planoEl = document.getElementById('planoList');
+  planoEl.innerHTML = planoDeAcao.length
+    ? planoDeAcao.map(item=>`
+        <div class="plano-item">
+          <div class="area-tag">${item.areaNome}</div>
+          <div class="q">${item.pergunta}</div>
+          <div class="obs">${item.obs ? item.obs : 'Sem descrição adicional.'}</div>
+          ${item.foto ? `<img src="${item.foto}">` : ''}
+        </div>`).join('')
+    : '<div class="empty-note">Nenhum plano de ação pendente nesta auditoria.</div>';
+}
+
+function formatDate(iso){
+  if(!iso) return '';
+  const [y,m,d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+document.getElementById('btnFinalizar').addEventListener('click', ()=>{
+  if(!validar()) return;
+  state.finalized = true;
+  renderReport();
+  document.getElementById('formView').style.display = 'none';
+  document.getElementById('report').style.display = 'block';
+  document.getElementById('footerBar').style.display = 'none';
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+
+document.getElementById('btnEditar').addEventListener('click', ()=>{
+  document.getElementById('formView').style.display = 'block';
+  document.getElementById('report').style.display = 'none';
+  document.getElementById('footerBar').style.display = 'block';
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+
+document.getElementById('btnPrint').addEventListener('click', ()=> window.print());
+
+document.getElementById('btnNovo').addEventListener('click', ()=>{
+  if(!confirm('Isso vai apagar todas as respostas e fotos desta auditoria. Continuar?')) return;
+  state = novoEstado();
+  document.getElementById('inpNome').value = '';
+  document.getElementById('inpData').value = '';
+  document.getElementById('selTurno').value = '';
+  document.getElementById('selUnidade').value = '';
+  renderAreas();
+  document.getElementById('formView').style.display = 'block';
+  document.getElementById('report').style.display = 'none';
+  document.getElementById('footerBar').style.display = 'block';
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+
+/* init */
+window.addEventListener('error', (ev)=>{
+  const container = document.getElementById('areasContainer');
+  if(container && !container.dataset.errorShown){
+    container.dataset.errorShown = '1';
+    container.innerHTML = `<div class="card" style="border-color:var(--red);">
+      <h2 style="color:var(--red);font-size:17px;">Não foi possível carregar o checklist</h2>
+      <p class="hint">Erro técnico: ${(ev.message || 'desconhecido').toString()}</p>
+      <p class="hint">Feche e reabra o arquivo. Se persistir, envie este print para quem preparou o formulário.</p>
+    </div>`;
+  }
+});
+
+try{
+  renderAreas();
+}catch(err){
+  const container = document.getElementById('areasContainer');
+  container.innerHTML = `<div class="card" style="border-color:var(--red);">
+    <h2 style="color:var(--red);font-size:17px;">Não foi possível carregar o checklist</h2>
+    <p class="hint">Erro técnico: ${(err && err.message) || err}</p>
+    <p class="hint">Feche e reabra o arquivo. Se persistir, envie este print para quem preparou o formulário.</p>
+  </div>`;
+}
+</script>
+</body>
+</html>
